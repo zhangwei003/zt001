@@ -102,16 +102,16 @@ class Login extends Basis
      *
      * @return mixed
      */
-    public function register(){
-        // POST提交
-        $this->request->isPost() && $this->result(
-            $this->logicLogin->doregister($this->request->post())
-        );
-        $padminModel  =new Padmin();
-        $padmins =  $padminModel->where(['status'=>$padminModel::STATUS_SUCCESS])->select();
-        $this->assign('padmins',$padmins);
-        return $this->fetch();
-    }
+//    public function register(){
+//        // POST提交
+//        $this->request->isPost() && $this->result(
+//            $this->logicLogin->doregister($this->request->post())
+//        );
+//        $padminModel  =new Padmin();
+//        $padmins =  $padminModel->where(['status'=>$padminModel::STATUS_SUCCESS])->select();
+//        $this->assign('padmins',$padmins);
+//        return $this->fetch();
+//    }
 
     /**
      * 注销登录

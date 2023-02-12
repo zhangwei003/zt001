@@ -106,86 +106,86 @@ class Login extends Base
      * @param array $data 注册数据
      * @return array
      */
-    public function doregister($data){
-        $validate = $this->validateRegister->check($data);
-
-        $where['account'] = $data['account'];
-        $User = new User();
-        $userInfo = $User->where($where)->find();
-        if(!empty($userInfo))
-        {
-            return [ 'code' => CodeEnum::ERROR, 'msg' => "邮箱已经存在"];
-        }
-        unset($where);
-//        $where['username'] = $data['username'];
+//    public function doregister($data){
+//        $validate = $this->validateRegister->check($data);
+//
+//        $where['account'] = $data['account'];
+//        $User = new User();
 //        $userInfo = $User->where($where)->find();
 //        if(!empty($userInfo))
 //        {
-//            return [ 'code' => CodeEnum::ERROR, 'msg' => "商户名已经存在"];
+//            return [ 'code' => CodeEnum::ERROR, 'msg' => "邮箱已经存在"];
 //        }
-
-        //数据检验
-        if (!$validate) {
-           return [ 'code' => CodeEnum::ERROR, 'msg' => $this->validateRegister->getError()];
-        }
-
-        //TODO 添加数据
-        Db::startTrans();
-        try{
-            //密码
-            $data['password'] = data_md5_key($data['password']);
-            //基本信息
-            $data['is_verify'] = 1;
-            $data['status'] = UserStatusEnum::ENABLE;
-            $uid = $this->modelUser->setInfo($data);
-            //账户记录
-            $this->modelUserAccount->setInfo(['uid'  => $uid ]);
-
-            //资金记录
-            $this->modelBalance->setInfo(['uid'  => $uid ]);
-            //生成API记录
-            $this->modelApi->setInfo(['uid'  => $uid,'key'=>md5(time())]);
-
-            //加入邮件队列
-            $jobData = $this->logicUser->getUserInfo(['uid'=>$uid],'uid,account,username');
-
-            //邮件场景
-            $jobData['scene']   = 'register';
-            $this->logicQueue->pushJobDataToQueue('AutoEmailWork' , $jobData , 'AutoEmailWork');
-
-            action_log('新增', '新增商户。UID:'. $uid);
-
-            //注册成功 入库user_padmin表
-            //todo   暂时不要对接跑分平台的
-          //  $padmin =$data['p_admin'];
-            $padmin =[];
-            $p_admin_id =config('paofen_super_admin_id');
-            $p_admin_appkey ='';
-            if($padmin)
-            {
-                $padmin  =explode('-',$padmin);
-                $p_admin_id =$padmin[0];
-                $p_admin_appkey =$padmin[1];
-            }
-            $userPadminModel = new UserPadmin();
-            $ret  =$userPadminModel->save([
-               'uid'=>$uid,
-               'p_admin_id'=>$p_admin_id,
-               'p_admin_appkey'=>$p_admin_appkey,
-            ]);
-            if($ret==false)
-            {
-                return [ 'code' => CodeEnum::ERROR, 'msg' => "绑定管理员失败"];
-            }
-            Db::commit();
-            return ['code' => CodeEnum::SUCCESS, 'msg' => '注册成功'];
-        }catch (\Exception $ex){
-            Db::rollback();
-            Log::error($ex->getMessage());
-            return ['code' => CodeEnum::ERROR, 'msg' => config('app_debug') ? $ex->getMessage()
-                : '哎呀！注册发生异常了~'];
-        }
-    }
+//        unset($where);
+////        $where['username'] = $data['username'];
+////        $userInfo = $User->where($where)->find();
+////        if(!empty($userInfo))
+////        {
+////            return [ 'code' => CodeEnum::ERROR, 'msg' => "商户名已经存在"];
+////        }
+//
+//        //数据检验
+//        if (!$validate) {
+//           return [ 'code' => CodeEnum::ERROR, 'msg' => $this->validateRegister->getError()];
+//        }
+//
+//        //TODO 添加数据
+//        Db::startTrans();
+//        try{
+//            //密码
+//            $data['password'] = data_md5_key($data['password']);
+//            //基本信息
+//            $data['is_verify'] = 1;
+//            $data['status'] = UserStatusEnum::ENABLE;
+//            $uid = $this->modelUser->setInfo($data);
+//            //账户记录
+//            $this->modelUserAccount->setInfo(['uid'  => $uid ]);
+//
+//            //资金记录
+//            $this->modelBalance->setInfo(['uid'  => $uid ]);
+//            //生成API记录
+//            $this->modelApi->setInfo(['uid'  => $uid,'key'=>md5(time())]);
+//
+//            //加入邮件队列
+//            $jobData = $this->logicUser->getUserInfo(['uid'=>$uid],'uid,account,username');
+//
+//            //邮件场景
+//            $jobData['scene']   = 'register';
+//            $this->logicQueue->pushJobDataToQueue('AutoEmailWork' , $jobData , 'AutoEmailWork');
+//
+//            action_log('新增', '新增商户。UID:'. $uid);
+//
+//            //注册成功 入库user_padmin表
+//            //todo   暂时不要对接跑分平台的
+//          //  $padmin =$data['p_admin'];
+//            $padmin =[];
+//            $p_admin_id =config('paofen_super_admin_id');
+//            $p_admin_appkey ='';
+//            if($padmin)
+//            {
+//                $padmin  =explode('-',$padmin);
+//                $p_admin_id =$padmin[0];
+//                $p_admin_appkey =$padmin[1];
+//            }
+//            $userPadminModel = new UserPadmin();
+//            $ret  =$userPadminModel->save([
+//               'uid'=>$uid,
+//               'p_admin_id'=>$p_admin_id,
+//               'p_admin_appkey'=>$p_admin_appkey,
+//            ]);
+//            if($ret==false)
+//            {
+//                return [ 'code' => CodeEnum::ERROR, 'msg' => "绑定管理员失败"];
+//            }
+//            Db::commit();
+//            return ['code' => CodeEnum::SUCCESS, 'msg' => '注册成功'];
+//        }catch (\Exception $ex){
+//            Db::rollback();
+//            Log::error($ex->getMessage());
+//            return ['code' => CodeEnum::ERROR, 'msg' => config('app_debug') ? $ex->getMessage()
+//                : '哎呀！注册发生异常了~'];
+//        }
+//    }
     /**
      * 数据检测
      *
