@@ -2,7 +2,7 @@
 
 /**
  *  +----------------------------------------------------------------------
- *  | 中通支付系统 [ WE CAN DO IT JUST THINK ]
+ *  | 狂神系统系统 [ WE CAN DO IT JUST THINK ]
  *  +----------------------------------------------------------------------
  *  | Copyright (c) 2018 http://www.iredcap.cn All rights reserved.
  *  +----------------------------------------------------------------------
@@ -37,7 +37,7 @@ class User extends Base
         //是否开启代付
 	$whether_open_daifu = $this->logicConfig->getConfigInfo(['name' => 'whether_open_daifu']);
 	$whether_open_daifu =0 ;
-        $this->assign('whether_open_daifu', $whether_open_daifu['value']);
+        $this->assign('whether_open_daifu', $whether_open_daifu);
         //资金 资产信息
         $this->assign('wallet', $this->logicBalance->getBalanceInfo(['uid'=>is_login()]));
   //      if (1||$whether_open_daifu) {''
@@ -56,11 +56,10 @@ class User extends Base
             ]);
 
 //        } else {
-            $this->assign('stat', $this->logicOrders->getWelcomeStat($where));
-    //    }
+            $this->assign('stat', $this->logicOrders->getUserWelcomeStat($where));
         //当月时间
         //当月数据统计
-        $this->assign('month', $this->logicOrders->getWelcomeStat($where));
+        $this->assign('month', $this->logicOrders->getUserWelcomeStat($where));
         //最新订单  当月时间
         $this->assign('list', $this->logicOrders->getOrderList($where, true, 'create_time desc', '5'));
 
@@ -80,9 +79,19 @@ class User extends Base
      */
     public function apiCommon()
     {
-        if ($this->request->isPost()) {
-
-        }
+//        if ($this->request->isPost()) {
+//
+//            //暂时去掉商户设置ip白名单
+//            if (isset($this->request->post('u/a')['auth_ips'])) {
+//                $this->result(0, '非法操作，请重试！');
+//            }
+//
+//            if ($this->request->post('u/a')['uid'] == is_login()) {
+//                $this->result($this->logicApi->editApi($this->request->post('u/a')));
+//            } else {
+//                $this->result(0, '非法操作，请重试！');
+//            }
+//        }
         $this->assign('api', $this->logicApi->getApiInfo(['uid' => is_login()]));
 
         $this->assign('rsa', $this->logicConfig->getConfigInfo(['name' => 'rsa_public_key'], 'value'));
@@ -137,33 +146,12 @@ class User extends Base
     /*
      *商户绑定登录IP白名单
      */
-    public function blndIp()
-    {
-        if ($this->request->isPost()) {
-            $auth_ips = $this->request->param('u.auth_login_ips');
-            $auth_ips = array_unique(array_filter(explode(PHP_EOL, $auth_ips)));
-            $tempIps = [];
-            foreach ($auth_ips as $ip) {
-                $ip = trim($ip);
-                if (empty($ip)) {
-                    continue;
-                }
-                if (!filter_var($ip, FILTER_VALIDATE_IP)) {
-                    $this->result(0, 'ip格式填写错误');
-                }
-                $tempIps[] = $ip;
-            }
-            $data['auth_login_ips'] = trim(implode(',', $tempIps));
-            $ret = $this->modelUser->where(['uid' => is_login()])->update($data);
-            if ($ret !== false) {
-                $this->result(1, '绑定成功');
-            }
-            $this->result(0, '绑定失败');
-        }
-        $userInfo = $this->logicUser->getUserInfo(['uid' => is_login()]);
-        $this->assign('ips', explode(',', $userInfo['auth_login_ips']));
-        return $this->fetch('blind_ip');
-    }
+//    public function blndIp()
+//    {
+//        $userInfo = $this->logicUser->getUserInfo(['uid' => is_login()]);
+//        $this->assign('ips', explode(',', $userInfo['auth_login_ips']));
+//        return $this->fetch('blind_ip');
+//    }
 
 
     /*
@@ -217,34 +205,12 @@ class User extends Base
         return $this->fetch();
     }
 
-    /**
-     * 认证信息
-     *
-     * @return mixed
-     * @author 勇敢的小笨羊 <brianwaring98@gmail.com>
-     *
-     */
-    public function auth()
-    {
-        if ($this->request->isPost()) {
-            if ($this->request->post('i/a')['uid'] == is_login()) {
-                $this->result($this->logicUser->saveUserAuth($this->request->post('i/a')));
-            } else {
-                $this->result(0, '非法操作，请重试！');
-            }
-        }
-        //认证检查
-        $this->assign('auth', $this->logicUser->getUserAuthInfo(['uid' => is_login()]));
-        return $this->fetch();
-    }
-
-    /**
-     * 密码管理
-     *
-     * @return mixed
-     * @author 勇敢的小笨羊 <brianwaring98@gmail.com>
-     *
-     */
+//     * 密码管理
+//     *
+//     * @return mixed
+//     * @author 勇敢的小笨羊 <brianwaring98@gmail.com>
+//     *
+//     */
     public function password()
     {
         if ($this->request->isPost()) {
@@ -291,39 +257,9 @@ class User extends Base
      */
     public function common()
     {
-
-        if ($this->request->isPost()) {
-            if ($this->request->post('i/a')['uid'] == is_login()) {
-                $data = $this->request->post('i/a');
-                //编辑用户信息的时候 如果有绑定google就绑定
-                $this->result($this->logicUser->editUser($data));
-            } else {
-                $this->result(0, '非法操作，请重试！');
-            }
-        }
-        //获取商户详细信息
         $this->assign('user', $this->logicUser->getUserInfo(['uid' => is_login()]));
 
     }
-
-    /**
-     * 上传认证图片  加水印
-     *
-     * @author 勇敢的小笨羊 <brianwaring98@gmail.com>
-     *
-     */
-    public function uploadAuth()
-    {
-
-        // 普通上传
-        //$this->request->isPost() && $this->result($this->logicFile->picUpload('card','userauth/' . is_login() . DS));
-        // Base64
-        $this->request->isPost() && $this->result($this->logicFile->saveBase64Image($this->request->post('pic'), 'userauth/' . is_login() . '/'));
-
-        $this->result(0, '非法操作，请重试！');
-
-    }
-
     /**
      * 常见问题
      *
