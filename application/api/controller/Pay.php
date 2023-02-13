@@ -211,7 +211,7 @@ class Pay extends BasePay
 
         if(!empty($data['pay_username']))
         {
-            Log::error('chongfu----'.$trade_no.'---------newip'. $request->post('ips'). $payusername);
+            //Log::error('chongfu----'.$trade_no.'---------newip'. $request->post('ips'). $payusername);
             if($payusername==$data['pay_username'])
             {
               return $this->success('ok', null, ['pay_username' => $payusername.strlen($payusername)]);
@@ -221,7 +221,7 @@ class Pay extends BasePay
             }
          }
         $ret = (new EwmOrder())->where('order_no', $trade_no)->setField('pay_username', $payusername);
-        Log::error('----'.$trade_no.'---------newip'. $request->post('ips'). $payusername);
+      //  Log::error('----'.$trade_no.'---------newip'. $request->post('ips'). $payusername);
         return $this->success('ok', null, ['pay_username' => $payusername.strlen($payusername)]);
 
     }
