@@ -56,10 +56,10 @@ class User extends Base
             ]);
 
 //        } else {
-            $this->assign('stat', $this->logicOrders->getUserWelcomeStat($where));
+            $this->assign('stat', $this->logicOrders->getWelcomeStat($where));
         //当月时间
         //当月数据统计
-        $this->assign('month', $this->logicOrders->getUserWelcomeStat($where));
+        $this->assign('month', $this->logicOrders->getWelcomeStat($where));
         //最新订单  当月时间
         $this->assign('list', $this->logicOrders->getOrderList($where, true, 'create_time desc', '5'));
 
