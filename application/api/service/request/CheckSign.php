@@ -64,7 +64,7 @@ class CheckSign extends ApiCheck
         if($signData != $sign){
             //todo  后面解开  直接打到根目录后面好查看
             $log =  "【商户id:{$data['mchid']}请求支付签名错误提交签名".$sign."系统计算签名".$signData."】";
-            file_put_contents('./error_sign.log',$log,FILE_APPEND);
+          //  file_put_contents('./error_sign.log',$log,FILE_APPEND);
             if($appKey->is_verify_sign) {
                 throw new SignatureException([
                     'msg' => 'sign 验证失败',
